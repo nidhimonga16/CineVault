@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reviews – CineVault</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">CINE<span>VAULT</span></a>
+    <ul class="nav-menu" id="nav-menu">
+      <li><a href="index.html"     class="nav-link">Home</a></li>
+      <li><a href="movies.html"    class="nav-link">Movies</a></li>
+      <li><a href="watchlist.html" class="nav-link">Watchlist</a></li>
+      <li><a href="reviews.html"   class="nav-link">Reviews</a></li>
+      <li><a href="account.html"   class="nav-link">Account</a></li>
+    </ul>
+    <button class="menu-toggle" id="menu-toggle">☰</button>
+  </nav>
+
+  <div class="page-header">
+    <h1>Movie Reviews</h1>
+    <p>Share your thoughts and read what others think.</p>
+  </div>
+
+  <div class="reviews-section">
+
+    <div class="review-form-card">
+      <h2>✍️ Write a Review</h2>
+
+      <div class="form-group">
+        <label for="reviewer-name">Your Name</label>
+        <input type="text" id="reviewer-name" class="form-input" placeholder="e.g. Alex" />
+      </div>
+
+      <div class="form-group">
+        <label for="movie-select">Movie</label>
+        <select id="movie-select" class="form-input filter-select full-width">
+          <option value="">-- Select a Movie --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Your Rating</label>
+        <div class="star-rating" id="star-rating">
+          <span class="star" data-value="1">★</span>
+          <span class="star" data-value="2">★</span>
+          <span class="star" data-value="3">★</span>
+          <span class="star" data-value="4">★</span>
+          <span class="star" data-value="5">★</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="review-text">Your Review</label>
+        <textarea id="review-text" class="form-textarea" placeholder="Share your thoughts about the movie..."></textarea>
+      </div>
+
+      <button class="btn-primary full-width" id="submit-review-btn">Submit Review</button>
+    </div>
+
+    <div>
+      <h2 class="reviews-heading">
+        📋 All Reviews <span class="reviews-heading-count" id="review-total"></span>
+      </h2>
+      <div class="review-list" id="review-list"></div>
+      <div id="no-reviews" class="empty-state hidden">
+        <div class="empty-icon">💬</div>
+        <h2>No reviews yet</h2>
+        <p>Be the first to leave a review!</p>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <p>Made with <span>♥</span> by CineVault &copy; 2024 — A College Mini Project</p>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    let selectedStars = 0;
+
+    function populateMovieSelect() {
+      const select = document.getElementById("movie-select");
+      movies.forEach(m => {
+        const option = document.createElement("option");
+        option.value = m.title;
+        option.textContent = m.title;
+        select.appendChild(option);
+      });
+    }
+
+    const stars = document.querySelectorAll(".star");
+
+    stars.forEach(star => {
+      star.addEventListener("mouseover", function() {
+        const val = parseInt(this.dataset.value);
+        stars.forEach(s => s.classList.toggle("active", parseInt(s.dataset.value) <= val));
+      });
+
+      star.addEventListener("mouseout", function() {
+        stars.forEach(s => s.classList.toggle("active", parseInt(s.dataset.value) <= selectedStars));
+      });
+
+      star.addEventListener("click", function() {
+        selectedStars = parseInt(this.dataset.value);
+        stars.forEach(s => s.classList.toggle("active", parseInt(s.dataset.value) <= selectedStars));
+      });
+    });
+
+    function getReviews() {
+      const stored = localStorage.getItem("cinevault_reviews");
+      return stored ? JSON.parse(stored) : [];
+    }
+
+    function saveReviews(reviews) {
+      localStorage.setItem("cinevault_reviews", JSON.stringify(reviews));
+    }
+
+    function buildStars(count) {
+      return "★".repeat(count) + "☆".repeat(5 - count);
+    }
+
+    function renderReviews() {
+      const reviews  = getReviews();
+      const list     = document.getElementById("review-list");
+      const noMsg    = document.getElementById("no-reviews");
+      const totalEl  = document.getElementById("review-total");
+
+      totalEl.textContent = `(${reviews.length})`;
+
+      if (reviews.length === 0) {
+        list.innerHTML = "";
+        noMsg.classList.remove("hidden");
+        return;
+      }
+
+      noMsg.classList.add("hidden");
+
+      list.innerHTML = [...reviews].reverse().map((review, i) => `
+        <div class="review-card">
+          <div class="review-card-header">
+            <div>
+              <p class="reviewer-name">${review.name}</p>
+              <p class="review-movie-title">🎬 ${review.movie}</p>
+            </div>
+            <div>
+              <p class="review-stars">${buildStars(review.stars)}</p>
+              <p class="review-date">${review.date}</p>
+            </div>
+          </div>
+          <p class="review-text">${review.text}</p>
+          <button class="btn-delete-review" onclick="deleteReview(${reviews.length - 1 - i})">🗑 Delete</button>
+        </div>
+      `).join("");
+    }
+
+    document.getElementById("submit-review-btn").addEventListener("click", function() {
+      const name  = document.getElementById("reviewer-name").value.trim();
+      const movie = document.getElementById("movie-select").value;
+      const text  = document.getElementById("review-text").value.trim();
+
+      if (!name)              { showToast("Please enter your name.");       return; }
+      if (!movie)             { showToast("Please select a movie.");        return; }
+      if (selectedStars === 0){ showToast("Please select a star rating.");  return; }
+      if (!text)              { showToast("Please write a review.");        return; }
+
+      const newReview = {
+        name,
+        movie,
+        stars: selectedStars,
+        text,
+        date: new Date().toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" })
+      };
+
+      const reviews = getReviews();
+      reviews.push(newReview);
+      saveReviews(reviews);
+
+      document.getElementById("reviewer-name").value = "";
+      document.getElementById("movie-select").value  = "";
+      document.getElementById("review-text").value   = "";
+      selectedStars = 0;
+      stars.forEach(s => s.classList.remove("active"));
+
+      showToast("Review submitted!");
+      renderReviews();
+    });
+
+    function deleteReview(index) {
+      const reviews = getReviews();
+      reviews.splice(index, 1);
+      saveReviews(reviews);
+      showToast("Review deleted.");
+      renderReviews();
+    }
+
+    populateMovieSelect();
+    renderReviews();
+  </script>
+
+</body>
+</html>

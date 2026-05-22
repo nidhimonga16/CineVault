@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CineVault – Your Movie Universe</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">CINE<span>VAULT</span></a>
+    <ul class="nav-menu" id="nav-menu">
+      <li><a href="index.html"     class="nav-link">Home</a></li>
+      <li><a href="movies.html"    class="nav-link">Movies</a></li>
+      <li><a href="watchlist.html" class="nav-link">Watchlist</a></li>
+      <li><a href="reviews.html"   class="nav-link">Reviews</a></li>
+      <li><a href="account.html"   class="nav-link">Account</a></li>
+    </ul>
+    <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">☰</button>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <span class="hero-badge">🎬 Stream Smarter</span>
+      <h1>Your Personal <span class="highlight">Movie Universe</span></h1>
+      <p>Discover trending films, save your favourites, and share your reviews — all in one place.</p>
+      <div class="hero-buttons">
+        <a href="movies.html" class="btn-primary">Browse Movies</a>
+        <a href="watchlist.html" class="btn-outline">My Watchlist</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">Trending Now</h2>
+      <a href="movies.html" class="section-link">See All →</a>
+    </div>
+    <div class="movies-grid" id="trending-grid"></div>
+  </section>
+
+  <section class="section section-no-top">
+    <div class="section-header">
+      <h2 class="section-title">Top Rated</h2>
+      <a href="movies.html" class="section-link">See All →</a>
+    </div>
+    <div class="movies-grid" id="toprated-grid"></div>
+  </section>
+
+  <section class="section section-no-top">
+    <div class="section-header">
+      <h2 class="section-title">Browse by Genre</h2>
+    </div>
+    <div class="genre-grid" id="genre-pills"></div>
+  </section>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <img class="modal-poster" id="modal-poster" src="" alt="Movie Poster" />
+      <div class="modal-body">
+        <h2 class="modal-title" id="modal-title"></h2>
+        <div class="modal-meta">
+          <span class="modal-genre-tag" id="modal-genre"></span>
+          <span class="modal-rating-tag" id="modal-rating"></span>
+          <span class="modal-year-tag"   id="modal-year"></span>
+        </div>
+        <p class="modal-desc" id="modal-desc"></p>
+        <button class="btn-primary" id="modal-watchlist-btn">+ Add to Watchlist</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>Made with <span>♥</span> by CineVault &copy; 2024 — A College Mini Project</p>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    function renderTrending() {
+      const grid = document.getElementById("trending-grid");
+      grid.innerHTML = movies
+        .filter(m => m.trending)
+        .slice(0, 6)
+        .map(m => buildMovieCard(m))
+        .join("");
+    }
+
+    function renderTopRated() {
+      const grid = document.getElementById("toprated-grid");
+      grid.innerHTML = movies
+        .filter(m => m.topRated)
+        .sort((a, b) => b.rating - a.rating)
+        .slice(0, 6)
+        .map(m => buildMovieCard(m))
+        .join("");
+    }
+
+    function renderGenres() {
+      const genres = [...new Set(movies.map(m => m.genre))];
+      document.getElementById("genre-pills").innerHTML = genres
+        .map(g => `<a href="movies.html?genre=${g}" class="genre-pill">${g}</a>`)
+        .join("");
+    }
+
+    renderTrending();
+    renderTopRated();
+    renderGenres();
+  </script>
+
+</body>
+</html>

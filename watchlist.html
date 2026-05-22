@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watchlist – CineVault</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">CINE<span>VAULT</span></a>
+    <ul class="nav-menu" id="nav-menu">
+      <li><a href="index.html"     class="nav-link">Home</a></li>
+      <li><a href="movies.html"    class="nav-link">Movies</a></li>
+      <li><a href="watchlist.html" class="nav-link">Watchlist</a></li>
+      <li><a href="reviews.html"   class="nav-link">Reviews</a></li>
+      <li><a href="account.html"   class="nav-link">Account</a></li>
+    </ul>
+    <button class="menu-toggle" id="menu-toggle">☰</button>
+  </nav>
+
+  <div class="page-header">
+    <h1>My Watchlist</h1>
+    <p id="watchlist-count">Loading...</p>
+  </div>
+
+  <div id="watchlist-container"></div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <img class="modal-poster" id="modal-poster" src="" alt="Movie Poster" />
+      <div class="modal-body">
+        <h2 class="modal-title" id="modal-title"></h2>
+        <div class="modal-meta">
+          <span class="modal-genre-tag" id="modal-genre"></span>
+          <span class="modal-rating-tag" id="modal-rating"></span>
+          <span class="modal-year-tag"   id="modal-year"></span>
+        </div>
+        <p class="modal-desc" id="modal-desc"></p>
+        <button class="btn-primary" id="modal-watchlist-btn">+ Add to Watchlist</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>Made with <span>♥</span> by CineVault &copy; 2024 — A College Mini Project</p>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    function renderWatchlist() {
+      const watchlistIds = getWatchlist();
+      const container    = document.getElementById("watchlist-container");
+      const countEl      = document.getElementById("watchlist-count");
+
+      if (watchlistIds.length === 0) {
+        countEl.textContent = "0 movies saved";
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🎬</div>
+            <h2>Your watchlist is empty</h2>
+            <p>Start adding movies to keep track of what you want to watch.</p>
+            <a href="movies.html" class="btn-primary">Browse Movies</a>
+          </div>
+        `;
+        return;
+      }
+
+      const savedMovies = watchlistIds
+        .map(id => movies.find(m => m.id === id))
+        .filter(Boolean);
+
+      countEl.textContent = `${savedMovies.length} movie${savedMovies.length !== 1 ? "s" : ""} saved`;
+
+      container.innerHTML = `
+        <div class="watchlist-grid">
+          ${savedMovies.map(movie => buildWatchlistCard(movie)).join("")}
+        </div>
+      `;
+    }
+
+    function buildWatchlistCard(movie) {
+      return `
+        <div class="movie-card" id="wl-card-${movie.id}">
+          <div class="card-poster">
+            ${safeImg(movie.image, movie.title)}
+            <div class="card-overlay">
+              <span class="genre-label">${movie.genre}</span>
+              <div class="card-actions">
+                <button class="btn-remove" onclick="handleRemove(${movie.id})">✕ Remove</button>
+                <button class="btn-details" onclick="openModal(${movie.id})">View Details</button>
+              </div>
+            </div>
+          </div>
+          <div class="card-info">
+            <span class="rating-badge">⭐ ${movie.rating}</span>
+            <h3 class="card-title">${movie.title}</h3>
+            <p class="card-year">${movie.year}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleRemove(movieId) {
+      removeFromWatchlist(movieId);
+      renderWatchlist();
+    }
+
+    renderWatchlist();
+  </script>
+
+</body>
+</html>
