@@ -34,7 +34,7 @@ const movies = [
     topRated: true
   },
   {
-    
+
     id: 4,
     title: "Parasite",
     genre: "Thriller",
@@ -135,11 +135,8 @@ const movies = [
   }
 ];
 
-// Single source of truth for the fallback poster path
 const POSTER_FALLBACK = "images/placeholder.jpg";
 
-// Returns a <img> string with shimmer loading state and onerror fallback.
-// Attach onload/onerror BEFORE src to avoid browser race conditions.
 function safeImg(src, alt, extraClasses) {
   const cls = extraClasses ? `img-loading ${extraClasses}` : "img-loading";
   return `<img
@@ -151,7 +148,6 @@ function safeImg(src, alt, extraClasses) {
   >`;
 }
 
-// --- Watchlist (localStorage) ---
 
 function getWatchlist() {
   const stored = localStorage.getItem("cinevault_watchlist");
@@ -183,7 +179,6 @@ function isInWatchlist(movieId) {
   return getWatchlist().includes(movieId);
 }
 
-// --- Toast ---
 
 function showToast(message) {
   const existing = document.getElementById("toast");
@@ -201,7 +196,6 @@ function showToast(message) {
   }, 2500);
 }
 
-// --- Movie card builder ---
 
 function buildMovieCard(movie) {
   const inList = isInWatchlist(movie.id);
@@ -240,7 +234,6 @@ function handleWatchlist(movieId, btn) {
   }
 }
 
-// --- Modal ---
 
 function openModal(movieId) {
   const movie = movies.find(m => m.id === movieId);
@@ -282,7 +275,6 @@ function closeModal() {
 document.addEventListener("click", e => { if (e.target.id === "modal-overlay") closeModal(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 
-// --- Active nav highlight ---
 
 function setActiveNav() {
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
@@ -293,7 +285,6 @@ function setActiveNav() {
 
 setActiveNav();
 
-// --- Mobile menu toggle ---
 
 const menuToggle = document.getElementById("menu-toggle");
 const navMenu    = document.getElementById("nav-menu");
